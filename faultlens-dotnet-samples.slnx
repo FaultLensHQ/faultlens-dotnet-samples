@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/FaultLens.SampleWebApi/FaultLens.SampleWebApi.csproj" />
+  </Folder>
+</Solution>

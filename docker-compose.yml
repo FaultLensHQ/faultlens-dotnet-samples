@@ -1,0 +1,13 @@
+services:
+  faultlens-sample-webapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      FaultLens__ApiKey: YOUR_PROJECT_API_KEY
+      FaultLens__Endpoint: https://TENANT-SLUG.staging.faultlens.in
+      FaultLens__Environment: staging
+      FaultLens__Release: faultlens-dotnet-sample-docker

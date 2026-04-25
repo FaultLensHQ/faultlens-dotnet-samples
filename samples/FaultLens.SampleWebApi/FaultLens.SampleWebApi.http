@@ -1,0 +1,6 @@
+@FaultLens.SampleWebApi_HostAddress = http://localhost:5299
+
+GET {{FaultLens.SampleWebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
