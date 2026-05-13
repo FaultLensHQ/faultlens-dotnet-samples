@@ -8,9 +8,11 @@ Public sample applications for integrating FaultLens SDKs into .NET applications
 
 This sample demonstrates a realistic ASP.NET Core integration using `FaultLens.SDK` with:
 
+- `FaultLens.SDK` `0.1.0-beta.2`
 - DI registration for `FaultLensClient`
 - request-scoped breadcrumbs via `BeginRequest(...)`
 - manual breadcrumbs via `AddStep(...)` and `AddDecision(...)`
+- diagnostics context via `SetRequestContext(...)`, `SetUserId(...)`, and `SetTag(...)`
 - manual message capture
 - handled exception capture
 - uncaught exception capture through a global exception handler
@@ -99,6 +101,7 @@ docker compose up --build
 - `GET /api/faultlens`
 - `POST /api/faultlens/breadcrumbs/manual`
 - `POST /api/faultlens/capture-message`
+- `POST /api/faultlens/diagnostics-context`
 - `GET /api/faultlens/handled-exception`
 - `GET /api/faultlens/http-failure`
 - `GET /api/faultlens/uncaught-exception`
@@ -106,11 +109,13 @@ docker compose up --build
 ## What to verify in FaultLens
 
 1. Trigger `POST /api/faultlens/capture-message` and confirm a message event appears.
-2. Trigger `GET /api/faultlens/handled-exception` and confirm breadcrumbs include the request scope and controller decisions.
-3. Trigger `GET /api/faultlens/http-failure` and confirm the outbound call breadcrumb is attached.
-4. Trigger `GET /api/faultlens/uncaught-exception` and confirm the global exception path is captured.
+2. Trigger `POST /api/faultlens/diagnostics-context` and confirm the event includes request URL, method/route context, user agent/runtime context, `userId = local-demo-user`, and tags for `sample`, `feature`, and `flow`.
+3. Trigger `GET /api/faultlens/handled-exception` and confirm breadcrumbs include the request scope and controller decisions.
+4. Trigger `GET /api/faultlens/http-failure` and confirm the outbound call breadcrumb is attached.
+5. Trigger `GET /api/faultlens/uncaught-exception` and confirm the global exception path is captured.
 
 ## Notes
 
 - No real keys are stored in this repo.
+- The diagnostics smoke endpoint uses sample values only and does not capture cookies, authorization headers, request bodies, or secrets.
 - This repo is for sample integrations, not production deployment templates.

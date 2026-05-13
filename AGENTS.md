@@ -49,7 +49,7 @@ Read this before starting any task in this repo.
 
 - **No hardcoded secrets**: configuration must come from environment variables, `appsettings.Development.json` (gitignored values), or Docker environment variables. Do not commit real API keys, tenant hosts, connection strings, or private endpoints.
 - **Configuration variables**: the expected config keys are `FaultLens__ApiKey`, `FaultLens__Endpoint`, `FaultLens__Environment`, and `FaultLens__Release`. Use these names consistently.
-- **SDK version**: the sample uses `FaultLens.Sdk` v0.1.0-beta.1. Do not bump the SDK version unless the issue explicitly requires it.
+- **SDK version**: the sample uses `FaultLens.SDK` v0.1.0-beta.2. Do not bump the SDK version unless the issue explicitly requires it.
 - **Target framework**: `net10.0`. Do not change this unless the issue explicitly requires it.
 - **Preserve sample flows**: DI registration, request-scoped breadcrumbs (`BeginRequest`), manual breadcrumbs (`AddStep`, `AddDecision`), message capture, handled exception capture, and global unhandled exception capture. Do not remove or quietly change these unless the issue requires it.
 - **Intentional sample errors**: exceptions and errors in sample code should be deliberate, clearly labelled, and useful for validating FaultLens capture behavior. Do not add accidental or silent failures.

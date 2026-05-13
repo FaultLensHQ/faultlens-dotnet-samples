@@ -28,7 +28,7 @@ README.md               run instructions and integration guide
 | Layer | Choice |
 |---|---|
 | Framework | ASP.NET Core (net10.0) |
-| FaultLens SDK | `FaultLens.Sdk` v0.1.0-beta.1 |
+| FaultLens SDK | `FaultLens.SDK` v0.1.0-beta.2 |
 | Language | C# (ImplicitUsings enabled, Nullable enabled) |
 | Containerised run | Docker |
 

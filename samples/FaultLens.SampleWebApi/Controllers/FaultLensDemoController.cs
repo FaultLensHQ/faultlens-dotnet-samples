@@ -1,4 +1,5 @@
 using FaultLens.Sdk;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -19,11 +20,51 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
                 "GET /api/faultlens",
                 "POST /api/faultlens/breadcrumbs/manual",
                 "POST /api/faultlens/capture-message",
+                "POST /api/faultlens/diagnostics-context",
                 "GET /api/faultlens/handled-exception",
                 "GET /api/faultlens/http-failure",
                 "GET /api/faultlens/uncaught-exception"
             },
             notes = "Use these endpoints to exercise FaultLens breadcrumbs, handled failures, and unhandled exception capture."
+        });
+    }
+
+    [HttpPost("diagnostics-context")]
+    public async Task<IActionResult> DiagnosticsContextAsync()
+    {
+        using var requestScope = BeginRequestScope("POST", "/api/faultlens/diagnostics-context");
+
+        ApplyDiagnosticsContext(requestScope);
+
+        faultLensClient.AddStep(
+            category: "sample.diagnostics-context.entry",
+            message: "Diagnostics context smoke endpoint invoked",
+            layer: BreadcrumbLayer.Application,
+            source: nameof(FaultLensDemoController),
+            data: new Dictionary<string, object>
+            {
+                ["traceId"] = HttpContext.TraceIdentifier
+            });
+
+        var result = await CaptureWithDeliveryResultAsync(callback =>
+            faultLensClient.CaptureMessage(
+                "FaultLens .NET sample diagnostics context capture",
+                fingerprint: "dotnet-sample:diagnostics-context",
+                callback: callback));
+
+        requestScope.Complete(StatusCodes.Status200OK);
+        return Ok(new
+        {
+            captured = true,
+            delivery = result,
+            userId = "local-demo-user",
+            tags = new Dictionary<string, string>
+            {
+                ["sample"] = "dotnet",
+                ["feature"] = "diagnostics-context",
+                ["flow"] = "manual-smoke-test"
+            },
+            traceId = HttpContext.TraceIdentifier
         });
     }
 
@@ -198,6 +239,22 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
             {
                 ["traceId"] = HttpContext.TraceIdentifier
             });
+    }
+
+    private void ApplyDiagnosticsContext(IFaultLensRequestScope requestScope)
+    {
+        requestScope.SetRequestContext(
+            HttpContext.Request.GetDisplayUrl(),
+            referrer: Request.Headers["Referer"].ToString(),
+            userAgent: Request.Headers["User-Agent"].ToString(),
+            queryString: Request.QueryString.HasValue
+                ? Request.QueryString.Value?.TrimStart('?')
+                : null);
+
+        requestScope.SetUserId("local-demo-user");
+        requestScope.SetTag("sample", "dotnet");
+        requestScope.SetTag("feature", "diagnostics-context");
+        requestScope.SetTag("flow", "manual-smoke-test");
     }
 
     private async Task<object> CaptureWithDeliveryResultAsync(Action<Action<DeliveryResult>> capture)
