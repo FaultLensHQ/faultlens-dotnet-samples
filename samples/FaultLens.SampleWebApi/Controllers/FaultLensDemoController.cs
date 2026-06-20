@@ -1,14 +1,21 @@
 using FaultLens.Sdk;
+using FaultLens.SampleWebApi.Configuration;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace FaultLens.SampleWebApi.Controllers;
 
 [ApiController]
 [Route("api/faultlens")]
-public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHttpClientFactory httpClientFactory) : ControllerBase
+public sealed class FaultLensDemoController(
+    FaultLensClient faultLensClient,
+    IHttpClientFactory httpClientFactory,
+    IOptions<FaultLensSampleSettings> sampleSettings) : ControllerBase
 {
+    private readonly FaultLensSampleSettings settings = sampleSettings.Value;
+
     [HttpGet]
     public IActionResult GetOverview()
     {
@@ -19,11 +26,23 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
             {
                 "GET /api/faultlens",
                 "POST /api/faultlens/breadcrumbs/manual",
+                "POST /api/faultlens/anonymous-context",
                 "POST /api/faultlens/capture-message",
                 "POST /api/faultlens/diagnostics-context",
                 "GET /api/faultlens/handled-exception",
                 "GET /api/faultlens/http-failure",
                 "GET /api/faultlens/uncaught-exception"
+            },
+            demoContext = new
+            {
+                environment = settings.Environment,
+                release = settings.Release,
+                service = settings.ServiceName,
+                serviceVersion = settings.ServiceVersion,
+                tenantId = settings.TenantId,
+                accountId = settings.AccountId,
+                userId = settings.UserId,
+                anonymousId = settings.AnonymousId
             },
             notes = "Use these endpoints to exercise FaultLens breadcrumbs, handled failures, and unhandled exception capture."
         });
@@ -43,7 +62,10 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
             source: nameof(FaultLensDemoController),
             data: new Dictionary<string, object>
             {
-                ["traceId"] = HttpContext.TraceIdentifier
+                ["traceId"] = HttpContext.TraceIdentifier,
+                ["correlationId"] = CorrelationId,
+                ["service"] = settings.ServiceName,
+                ["serviceVersion"] = settings.ServiceVersion
             });
 
         var result = await CaptureWithDeliveryResultAsync(callback =>
@@ -57,13 +79,19 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
         {
             captured = true,
             delivery = result,
-            userId = "local-demo-user",
+            identity = new
+            {
+                tenantId = settings.TenantId,
+                accountId = settings.AccountId,
+                userId = settings.UserId
+            },
             tags = new Dictionary<string, string>
             {
                 ["sample"] = "dotnet",
                 ["feature"] = "diagnostics-context",
                 ["flow"] = "manual-smoke-test"
             },
+            correlationId = CorrelationId,
             traceId = HttpContext.TraceIdentifier
         });
     }
@@ -80,13 +108,69 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
             source: nameof(FaultLensDemoController),
             data: new Dictionary<string, object>
             {
-                ["traceId"] = HttpContext.TraceIdentifier
+                ["traceId"] = HttpContext.TraceIdentifier,
+                ["correlationId"] = CorrelationId,
+                ["route"] = "/api/faultlens/breadcrumbs/manual",
+                ["method"] = "POST"
             });
 
         requestScope.Complete(StatusCodes.Status200OK);
         return Ok(new
         {
             breadcrumbAdded = true,
+            correlationId = CorrelationId,
+            traceId = HttpContext.TraceIdentifier
+        });
+    }
+
+    [HttpPost("anonymous-context")]
+    public async Task<IActionResult> AnonymousContextAsync()
+    {
+        using var requestScope = BeginRequestScope(
+            "POST",
+            "/api/faultlens/anonymous-context",
+            applyKnownIdentity: false);
+
+        requestScope.SetAnonymousId(settings.AnonymousId);
+        requestScope.SetCorrelationId(CorrelationId);
+        requestScope.SetTag("feature", "anonymous-context");
+        requestScope.SetTag("flow", "anonymous-smoke-test");
+
+        faultLensClient.AddStep(
+            category: "sample.anonymous-context.entry",
+            message: "Anonymous context smoke endpoint invoked",
+            layer: BreadcrumbLayer.Application,
+            source: nameof(FaultLensDemoController),
+            data: new Dictionary<string, object>
+            {
+                ["traceId"] = HttpContext.TraceIdentifier,
+                ["correlationId"] = CorrelationId,
+                ["route"] = "/api/faultlens/anonymous-context",
+                ["method"] = "POST"
+            });
+
+        var result = await CaptureWithDeliveryResultAsync(callback =>
+            faultLensClient.CaptureMessage(
+                "FaultLens .NET sample anonymous context capture",
+                fingerprint: "dotnet-sample:anonymous-context",
+                callback: callback));
+
+        requestScope.Complete(StatusCodes.Status200OK);
+        return Ok(new
+        {
+            captured = true,
+            delivery = result,
+            identity = new
+            {
+                anonymousId = settings.AnonymousId
+            },
+            tags = new Dictionary<string, string>
+            {
+                ["sample"] = "dotnet",
+                ["feature"] = "anonymous-context",
+                ["flow"] = "anonymous-smoke-test"
+            },
+            correlationId = CorrelationId,
             traceId = HttpContext.TraceIdentifier
         });
     }
@@ -109,7 +193,10 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
             source: nameof(FaultLensDemoController),
             data: new Dictionary<string, object>
             {
-                ["fingerprint"] = "dotnet-sample:message"
+                ["fingerprint"] = "dotnet-sample:message",
+                ["service"] = settings.ServiceName,
+                ["release"] = settings.Release,
+                ["environment"] = settings.Environment
             });
 
         var result = await CaptureWithDeliveryResultAsync(callback =>
@@ -123,6 +210,7 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
         {
             captured = true,
             delivery = result,
+            correlationId = CorrelationId,
             traceId = HttpContext.TraceIdentifier
         });
     }
@@ -152,7 +240,11 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
                 source: nameof(FaultLensDemoController),
                 data: new Dictionary<string, object>
                 {
-                    ["exceptionType"] = ex.GetType().Name
+                    ["exceptionType"] = ex.GetType().Name,
+                    ["exceptionMessage"] = ex.Message,
+                    ["route"] = "/api/faultlens/handled-exception",
+                    ["method"] = "GET",
+                    ["service"] = settings.ServiceName
                 });
 
             var result = await CaptureWithDeliveryResultAsync(callback =>
@@ -165,6 +257,7 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
                 handled = true,
                 delivery = result,
                 exception = ex.GetType().Name,
+                correlationId = CorrelationId,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -185,7 +278,10 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
             data: new Dictionary<string, object>
             {
                 ["url"] = "http://localhost:65534/unreachable",
-                ["method"] = "GET"
+                ["method"] = "GET",
+                ["route"] = "/api/faultlens/http-failure",
+                ["correlationId"] = CorrelationId,
+                ["service"] = settings.ServiceName
             });
 
         try
@@ -205,6 +301,8 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
                 captured = true,
                 delivery = result,
                 exception = ex.GetType().Name,
+                upstreamStatus = StatusCodes.Status502BadGateway,
+                correlationId = CorrelationId,
                 traceId = HttpContext.TraceIdentifier
             });
         }
@@ -229,16 +327,26 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
             HttpStatusCode.BadGateway);
     }
 
-    private IFaultLensRequestScope BeginRequestScope(string method, string route)
+    private IFaultLensRequestScope BeginRequestScope(string method, string route, bool applyKnownIdentity = true)
     {
-        return faultLensClient.BeginRequest(
+        var scope = faultLensClient.BeginRequest(
             method,
             route,
-            source: "FaultLens.SampleWebApi",
+            source: settings.ServiceName,
             data: new Dictionary<string, object>
             {
-                ["traceId"] = HttpContext.TraceIdentifier
+                ["traceId"] = HttpContext.TraceIdentifier,
+                ["correlationId"] = CorrelationId,
+                ["route"] = route,
+                ["method"] = method,
+                ["environment"] = settings.Environment,
+                ["release"] = settings.Release,
+                ["service"] = settings.ServiceName,
+                ["serviceVersion"] = settings.ServiceVersion
             });
+
+        ApplySampleContext(scope, applyKnownIdentity);
+        return scope;
     }
 
     private void ApplyDiagnosticsContext(IFaultLensRequestScope requestScope)
@@ -251,10 +359,33 @@ public sealed class FaultLensDemoController(FaultLensClient faultLensClient, IHt
                 ? Request.QueryString.Value?.TrimStart('?')
                 : null);
 
-        requestScope.SetUserId("local-demo-user");
-        requestScope.SetTag("sample", "dotnet");
         requestScope.SetTag("feature", "diagnostics-context");
         requestScope.SetTag("flow", "manual-smoke-test");
+    }
+
+    private void ApplySampleContext(IFaultLensRequestScope requestScope, bool applyKnownIdentity)
+    {
+        if (applyKnownIdentity)
+        {
+            requestScope.SetAccount(
+                accountId: settings.AccountId,
+                tenantId: settings.TenantId);
+            requestScope.SetUser(settings.UserId);
+        }
+
+        requestScope.SetTag("sample", "dotnet");
+        requestScope.SetTag("planTier", "demo-enterprise");
+    }
+
+    private string CorrelationId
+    {
+        get
+        {
+            var headerValue = Request.Headers["X-Correlation-ID"].ToString();
+            return string.IsNullOrWhiteSpace(headerValue)
+                ? HttpContext.TraceIdentifier
+                : headerValue;
+        }
     }
 
     private async Task<object> CaptureWithDeliveryResultAsync(Action<Action<DeliveryResult>> capture)

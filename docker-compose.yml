@@ -10,4 +10,10 @@ services:
       FaultLens__ApiKey: YOUR_PROJECT_API_KEY
       FaultLens__Endpoint: https://TENANT-SLUG.staging.faultlens.in
       FaultLens__Environment: staging
-      FaultLens__Release: faultlens-dotnet-sample-docker
+      FaultLens__Release: v1.8.4-docker
+      FaultLens__ServiceName: checkout-api
+      FaultLens__ServiceVersion: v1.8.4+docker
+      FaultLens__TenantId: tenant_demo_retail
+      FaultLens__AccountId: acct_demo_standard
+      FaultLens__UserId: user_demo_123
+      FaultLens__AnonymousId: anon_demo_browser_456

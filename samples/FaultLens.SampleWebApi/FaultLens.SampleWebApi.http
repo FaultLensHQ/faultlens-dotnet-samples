@@ -1,6 +1,40 @@
-@FaultLens.SampleWebApi_HostAddress = http://localhost:5299
+@FaultLens.SampleWebApi_HostAddress = http://localhost:5241
 
-GET {{FaultLens.SampleWebApi_HostAddress}}/weatherforecast/
+GET {{FaultLens.SampleWebApi_HostAddress}}/api/faultlens
 Accept: application/json
 
 ###
+
+POST {{FaultLens.SampleWebApi_HostAddress}}/api/faultlens/diagnostics-context
+X-Correlation-ID: sample-correlation-001
+Accept: application/json
+
+###
+
+POST {{FaultLens.SampleWebApi_HostAddress}}/api/faultlens/anonymous-context
+X-Correlation-ID: sample-correlation-001a
+Accept: application/json
+
+###
+
+POST {{FaultLens.SampleWebApi_HostAddress}}/api/faultlens/capture-message
+X-Correlation-ID: sample-correlation-002
+Accept: application/json
+
+###
+
+GET {{FaultLens.SampleWebApi_HostAddress}}/api/faultlens/handled-exception
+X-Correlation-ID: sample-correlation-003
+Accept: application/json
+
+###
+
+GET {{FaultLens.SampleWebApi_HostAddress}}/api/faultlens/http-failure
+X-Correlation-ID: sample-correlation-004
+Accept: application/json
+
+###
+
+GET {{FaultLens.SampleWebApi_HostAddress}}/api/faultlens/uncaught-exception
+X-Correlation-ID: sample-correlation-005
+Accept: application/json

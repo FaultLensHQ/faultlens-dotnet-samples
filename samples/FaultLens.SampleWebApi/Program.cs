@@ -33,7 +33,9 @@ builder.Services.AddSingleton<FaultLensClient>(sp =>
         environment: environmentName,
         release: release,
         endpoint: endpoint,
-        breadcrumbCapacity: settings.BreadcrumbCapacity));
+        breadcrumbCapacity: settings.BreadcrumbCapacity,
+        serviceName: settings.ServiceName,
+        serviceVersion: settings.ServiceVersion));
 });
 builder.Services.AddSingleton<IFaultLensClient>(sp => sp.GetRequiredService<FaultLensClient>());
 builder.Services.AddHttpClient("demo-upstream", client =>
