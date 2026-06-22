@@ -8,7 +8,7 @@ Public sample applications for integrating FaultLens SDKs into .NET applications
 
 This sample demonstrates a realistic ASP.NET Core integration using `FaultLens.SDK` with:
 
-- `FaultLens.SDK` `1.0.1`
+- `FaultLens.SDK` `1.0.2`
 - DI registration for `FaultLensClient`
 - request-scoped breadcrumbs via `BeginRequest(...)`
 - manual breadcrumbs via `AddStep(...)` and `AddDecision(...)`
@@ -25,6 +25,12 @@ This sample demonstrates a realistic ASP.NET Core integration using `FaultLens.S
 - Docker Desktop (optional, for container run)
 - a FaultLens project API key
 - your tenant FaultLens host
+
+Install the SDK package directly from NuGet:
+
+```powershell
+dotnet add package FaultLens.SDK --version 1.0.2
+```
 
 For current staging validation, use your tenant host directly, for example:
 
@@ -71,7 +77,7 @@ $env:FaultLens__UserId = 'user_demo_123'
 $env:FaultLens__AnonymousId = 'anon_demo_browser_456'
 ```
 
-Use placeholder or non-sensitive sample values only. Do not commit real project keys, tenant identifiers, customer identifiers, user emails, access tokens, cookies, request bodies, authorization headers, connection strings, or private endpoints.
+Use placeholder or non-sensitive sample values only. Do not hardcode production API keys. Do not commit real project keys, tenant identifiers, customer identifiers, user emails, passwords, payment data, access tokens, cookies, request bodies, authorization headers, connection strings, or private endpoints.
 
 ## Local run
 
@@ -177,7 +183,7 @@ Unsupported / sample-only gap:
 - Releases can identify events first seen after deployment or release-adjacent clusters when the configured `release` value changes.
 - Alerting and environment reporting can filter by stable environment labels such as `production`, `staging`, and `development`.
 
-Use non-sensitive identifiers that help your team investigate safely. Prefer stable opaque IDs like `tenant_abc123`, `acct_042`, or `user_123`; avoid names, emails, phone numbers, tokens, cookies, secrets, full request bodies, or authorization headers.
+Use non-sensitive identifiers that help your team investigate safely. Prefer stable opaque IDs like `tenant_abc123`, `acct_042`, or `user_123`; avoid names, emails, phone numbers, passwords, payment data, tokens, cookies, secrets, full request bodies, or authorization headers.
 
 ## Notes
 
