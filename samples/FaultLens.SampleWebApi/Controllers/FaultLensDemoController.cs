@@ -29,6 +29,7 @@ public sealed class FaultLensDemoController(
                 "POST /api/faultlens/anonymous-context",
                 "POST /api/faultlens/capture-message",
                 "POST /api/faultlens/diagnostics-context",
+                "GET /api/faultlens/critical-capability",
                 "GET /api/faultlens/handled-exception",
                 "GET /api/faultlens/http-failure",
                 "GET /api/faultlens/uncaught-exception"
@@ -213,6 +214,57 @@ public sealed class FaultLensDemoController(
             correlationId = CorrelationId,
             traceId = HttpContext.TraceIdentifier
         });
+    }
+
+    [HttpGet("critical-capability")]
+    public async Task<IActionResult> CriticalCapabilityAsync()
+    {
+        // Explicit business-severity metadata. FaultLens never infers criticality from
+        // routes or URLs — these reserved tags are the only trusted severity signal. The
+        // backend consumes exactly capability + criticality + operation (Option B); the
+        // operation field may name a route, workflow, job, or command.
+        using var requestScope = BeginRequestScope("GET", "/api/faultlens/critical-capability");
+
+        requestScope.SetCapability(
+            capability: "checkout",
+            criticality: FaultLensCriticality.Critical,
+            operation: "payment-capture");
+
+        faultLensClient.AddStep(
+            category: "sample.critical-capability.entry",
+            message: "Critical-capability demo endpoint invoked",
+            layer: BreadcrumbLayer.Application,
+            source: nameof(FaultLensDemoController),
+            data: new Dictionary<string, object>
+            {
+                ["capability"] = "checkout",
+                ["criticality"] = FaultLensCriticality.Critical,
+                ["operation"] = "payment-capture"
+            });
+
+        try
+        {
+            throw new InvalidOperationException(
+                "Payment capture failed in the FaultLens .NET sample (critical capability demo).");
+        }
+        catch (Exception ex)
+        {
+            var result = await CaptureWithDeliveryResultAsync(callback =>
+                faultLensClient.CaptureException(ex, fingerprint: "dotnet-sample:critical-capability", callback: callback));
+
+            requestScope.Complete(StatusCodes.Status200OK);
+            return Ok(new
+            {
+                captured = true,
+                delivery = result,
+                capability = "checkout",
+                criticality = FaultLensCriticality.Critical,
+                operation = "payment-capture",
+                note = "The backend promotes faultlens.capability / faultlens.criticality / faultlens.operation onto the issue.",
+                correlationId = CorrelationId,
+                traceId = HttpContext.TraceIdentifier
+            });
+        }
     }
 
     [HttpGet("handled-exception")]
