@@ -22,7 +22,7 @@ builder.Services.AddSingleton<FaultLensClient>(sp =>
         ? typeof(Program).Assembly.GetName().Version?.ToString() ?? "1.0.0"
         : settings.Release.Trim();
     var endpoint = string.IsNullOrWhiteSpace(settings.Endpoint)
-        ? new Uri("https://TENANT-SLUG.staging.faultlens.in")
+        ? new Uri("https://YOUR-WORKSPACE.faultlens.in")
         : new Uri(settings.Endpoint.Trim());
     var environmentName = string.IsNullOrWhiteSpace(settings.Environment)
         ? environment.EnvironmentName
