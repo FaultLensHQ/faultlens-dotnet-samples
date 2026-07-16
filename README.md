@@ -2,6 +2,11 @@
 
 Public sample applications for integrating FaultLens SDKs into .NET applications.
 
+## Platform support
+
+FaultLens supports any platform. Use an official SDK where available, or integrate directly using
+the HTTP ingestion API. This repo covers the official .NET SDK.
+
 ## Current sample
 
 - `samples/FaultLens.SampleWebApi`
