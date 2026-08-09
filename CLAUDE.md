@@ -56,5 +56,5 @@ docker-compose up             # run with Docker Compose (requires env vars)
 - Read only the files needed for the task before editing. Prefer `Edit` (targeted diff) over full rewrites.
 - Keep diffs narrow — no formatting churn, no unrelated renames.
 - If sample behavior or run instructions change, update `README.md` in the same commit.
-- After validation, update the GitHub issue using `C:\PersonalProjects\faultlens-ui\issue-body.md` and `gh issue comment`.
+- After validation, update the GitHub issue using a temporary ignored body file and `gh issue comment --body-file`.
 - Do not deploy or publish unless explicitly requested.
