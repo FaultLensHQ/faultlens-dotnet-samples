@@ -1,0 +1,14 @@
+{
+  "source": "FaultLensHQ/faultlens-engineering",
+  "standardsVersion": "1.2.8",
+  "sourceCommit": "5386de8ea63968424ccc9838c8ba47dc2b78e015",
+  "syncStatus": "synchronized",
+  "profile": "samples-dotnet",
+  "distributionMode": "canonical-with-repository-overlay",
+  "managedFiles": [
+    ".claude/skills/faultlens-engineering/SKILL.md",
+    ".codex/skills/faultlens-engineering/SKILL.md"
+  ],
+  "overlayFiles": ["AGENTS.md", "CLAUDE.md"],
+  "reconciledAt": "2026-08-29"
+}
