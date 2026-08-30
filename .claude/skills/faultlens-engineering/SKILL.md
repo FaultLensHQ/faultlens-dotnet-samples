@@ -9,7 +9,7 @@ This is a thin router. Root `AGENTS.md` and `CLAUDE.md` remain the repository-lo
 
 ## Operating-role boundary
 
-Canonical role governance comes from `FaultLensHQ/faultlens-engineering/docs/agents/operating-roles.md`, governance **1.2.8**, released source commit `5386de8ea63968424ccc9838c8ba47dc2b78e015`.
+Canonical role governance comes from `FaultLensHQ/faultlens-engineering/docs/agents/operating-roles.md`, governance **1.2.11**, released source commit `a32927ebd6b5670293d16ae0644624f11bff2757`.
 
 - **AI Governor** applies to agent/skill/governance/rule/version/distribution changes.
 - **Architecture & Product Governor** independently reviews returned implementation against the actual current PR/head/base/diff/evidence.
@@ -18,7 +18,7 @@ Canonical role governance comes from `FaultLensHQ/faultlens-engineering/docs/age
 
 ## Compute and validation economy
 
-Canonical compute/context governance comes from `FaultLensHQ/faultlens-engineering/docs/ai-compute-context-economy.md`, governance **1.2.8**, released source commit `5386de8ea63968424ccc9838c8ba47dc2b78e015`.
+Canonical compute/context governance comes from `FaultLensHQ/faultlens-engineering/docs/ai-compute-context-economy.md`, governance **1.2.11**, released source commit `a32927ebd6b5670293d16ae0644624f11bff2757`.
 
 - Use strongest reasoning for unresolved product/public-contract/privacy/design questions and strict independent Review.
 - Use a medium-cost capable execution model for normal implementation once the contract is settled, and the lowest-cost capable tier for deterministic/repetitive execution.
@@ -27,9 +27,15 @@ Canonical compute/context governance comes from `FaultLensHQ/faultlens-engineeri
 - Hosted PR CI is the authoritative full-regression merge gate where available; broader local suites remain appropriate for uncertain blast radius, CI/build/test infrastructure changes, CI-failure reproduction, unavailable hosted CI, or repository-specific requirements.
 - Never weaken, skip, quarantine, baseline or ignore failures to obtain green evidence.
 
+## Workspace and repository resolution
+
+Canonical local-workspace governance comes from `FaultLensHQ/faultlens-engineering/docs/engineering/local-workspace-resolution.md`, governance **1.2.11**, released source commit `a32927ebd6b5670293d16ae0644624f11bff2757`.
+
+Before cloning or reconstructing a FaultLens repository, resolve `FaultLensHQ/<repo>` against the configured local workspace/repository map, verify the candidate Git working tree and remote identity, and reuse the valid local checkout. GitHub remains authoritative for durable issues, PRs, review state, hosted CI and remote evidence. Local-first execution does not authorize stale-ref assumptions or destructive worktree cleanup.
+
 ## Pull-request validation and review state
 
-Canonical PR validation/review governance comes from `FaultLensHQ/faultlens-engineering/docs/engineering/pr-validation-and-review-state.md`, governance **1.2.8**, released source commit `5386de8ea63968424ccc9838c8ba47dc2b78e015`.
+Canonical PR validation/review governance comes from `FaultLensHQ/faultlens-engineering/docs/engineering/pr-validation-and-review-state.md`, governance **1.2.11**, released source commit `a32927ebd6b5670293d16ae0644624f11bff2757`.
 
 - Open implementation PRs non-Draft / Ready for review by default; GitHub Ready is not merge approval.
 - While incomplete, record `IMPLEMENTATION IN PROGRESS — NOT READY FOR GOVERNOR REVIEW`.

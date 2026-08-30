@@ -1,14 +1,15 @@
 {
   "source": "FaultLensHQ/faultlens-engineering",
-  "standardsVersion": "1.2.8",
-  "sourceCommit": "5386de8ea63968424ccc9838c8ba47dc2b78e015",
+  "standardsVersion": "1.2.11",
+  "sourceCommit": "a32927ebd6b5670293d16ae0644624f11bff2757",
   "syncStatus": "synchronized",
   "profile": "samples-dotnet",
   "distributionMode": "canonical-with-repository-overlay",
   "managedFiles": [
+    "docs/engineering/local-workspace-resolution.md",
     ".claude/skills/faultlens-engineering/SKILL.md",
     ".codex/skills/faultlens-engineering/SKILL.md"
   ],
   "overlayFiles": ["AGENTS.md", "CLAUDE.md"],
-  "reconciledAt": "2026-08-29"
+  "reconciledAt": "2026-08-30"
 }
